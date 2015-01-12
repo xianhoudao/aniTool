@@ -18,6 +18,11 @@
 #include "aniToolMain.h"
 #include "include/ark_scrolledWindow.h"
 #include "include/ark_splitterWindow.h"
+
+#include "wx/docview.h"
+#include "wx/config.h"
+#include "wx/docmdi.h"
+
 //helper functions
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -50,6 +55,8 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 aniToolFrame::aniToolFrame(wxFrame *frame)
     : GUIFrame(frame)
 {
+	 ::wxInitAllImageHandlers();
+
 #if wxUSE_STATUSBAR
     statusBar->SetStatusText(_("Hello Code::Blocks user!"), 0);
     statusBar->SetStatusText(wxbuildinfo(short_f), 1);
@@ -63,13 +70,34 @@ aniToolFrame::aniToolFrame(wxFrame *frame)
     // zero gravity were used (although it would do no harm neither).
     m_splitter->SetSize(GetClientSize());
     m_splitter->SetSashGravity(1.0);
+	m_splitter->SetMinimumPaneSize(100);
 
     m_left = new ark_scrolledWindow(m_splitter);
-    m_left->SetBackgroundColour(*wxCYAN);
+	wxColour color;
+	color.Set(16,161,244);
+    m_left->SetBackgroundColour(color);
     m_right = new ark_scrolledWindow(m_splitter);
-
+	m_right->SetBackgroundColour(*wxCYAN);
     m_splitter->SplitVertically(m_left, m_right, 0);
 
+	wxDocManager *docManager = new wxDocManager;
+	new wxDocTemplate(docManager, "Image", "*.png;*.jpg", "", "png;jpg",
+		"Image Doc", "Image View",
+		CLASSINFO(wxDocument), CLASSINFO(wxView));
+	
+	wxFrame *frame1;
+	frame1 = new wxDocMDIParentFrame(docManager, NULL, wxID_ANY,
+			//GetAppDisplayName(),
+			wxApp::GetInstance()->GetAppDisplayName(),
+			wxDefaultPosition,
+			wxSize(500, 400));
+	// A nice touch: a history of files visited. Use this menu.
+
+	docManager->FileHistoryUseMenu(mbar->GetMenu(0));
+#if wxUSE_CONFIG
+	docManager->FileHistoryLoad(*wxConfig::Get());
+#endif // wxUSE_CONFIG
+	mbar->GetMenu(1)->Append(wxID_OPEN);
 }
 
 aniToolFrame::~aniToolFrame()

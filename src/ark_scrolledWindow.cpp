@@ -1,4 +1,4 @@
-#include "ark_scrolledWindow.h"
+#include "include/ark_scrolledWindow.h"
 
 ark_scrolledWindow::ark_scrolledWindow(wxWindow *parent)
 :wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,

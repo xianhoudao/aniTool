@@ -22,7 +22,7 @@ BEGIN_EVENT_TABLE( GUIFrame, wxFrame )
     EVT_CLOSE( GUIFrame::_wxFB_OnClose )
     EVT_MENU( idMenuQuit, GUIFrame::_wxFB_OnQuit )
     EVT_MENU( idMenuAbout, GUIFrame::_wxFB_OnAbout )
-    EVT_MENU( idMenuSetImage, GUIFrame::_wxFB_OnSetImage )
+    //EVT_MENU( idMenuSetImage, GUIFrame::_wxFB_OnSetImage )
 END_EVENT_TABLE()
 
 GUIFrame::GUIFrame( wxWindow* parent, int id, wxString title, wxPoint pos, wxSize size, int style ) : wxFrame( parent, id, title, pos, size, style )
@@ -57,8 +57,8 @@ GUIFrame::GUIFrame( wxWindow* parent, int id, wxString title, wxPoint pos, wxSiz
     wxMenu* ProjectMenu;
     ProjectMenu = new wxMenu();
 
-    wxMenuItem* menuSetImage = new wxMenuItem( ProjectMenu, idMenuSetImage, wxString( wxT("&Set Image") ) , wxT("Set Image"), wxITEM_NORMAL );
-    ProjectMenu->Append(menuSetImage);
+    //wxMenuItem* menuSetImage = new wxMenuItem( ProjectMenu, wxID_OPEN, wxString( wxT("&Set Image") ) , wxT("Set Image"), wxITEM_NORMAL );
+    //ProjectMenu->Append(wxID_OPEN);
     mbar->Append( ProjectMenu, wxT("&Project") );
 
     ///help menu
