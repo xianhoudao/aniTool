@@ -17,6 +17,9 @@
 
 #include "GUIFrame.h"
 #include "wx/splitter.h"
+#include "wx/aui/aui.h"
+
+class ark_leftPanel;
 
 class aniToolFrame: public GUIFrame
 {
@@ -28,9 +31,18 @@ class aniToolFrame: public GUIFrame
         virtual void OnQuit(wxCommandEvent& event);
         virtual void OnAbout(wxCommandEvent& event);
         virtual void OnSetImage(wxCommandEvent& event);
-    private:
-        wxSplitterWindow* m_splitter;
-        wxWindow *m_left, *m_right;
+protected:
+	
+private:
+		wxImage m_image;
+		wxMenuBar* mbar;
+		wxStatusBar* statusBar;
+		 
+		wxSplitterWindow* m_splitter;
+		ark_leftPanel *m_left;
+		ark_scrolledWindow *m_right;
+
+		wxAuiManager m_mgr;
 };
 
 #endif // ANITOOLMAIN_H

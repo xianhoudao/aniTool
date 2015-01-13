@@ -22,14 +22,19 @@
 #include <wx/menu.h>
 
 ///////////////////////////////////////////////////////////////////////////
+enum MyEnum
+{
+	idMenuQuit =1000,
+	idMenuAbout,
+	idMenuNew,
+	idMenuOpen,
+	idMenuSave,
+	idMenuSaveAs,
+	idMenuSetImage,
+	////
+	idToolBar1,
+};
 
-#define idMenuQuit 1000
-#define idMenuAbout 1001
-#define idMenuNew 1002
-#define idMenuOpen 1003
-#define idMenuSave 1004
-#define idMenuSaveAs 1005
-#define idMenuSetImage 1006
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrame
@@ -46,8 +51,7 @@ class GUIFrame : public wxFrame
         void _wxFB_OnSetImage( wxCommandEvent& event ){ OnSetImage( event ); }
 
     protected:
-        wxMenuBar* mbar;
-        wxStatusBar* statusBar;
+
 
         // Virtual event handlers, overide them in your derived class
         virtual void OnClose( wxCloseEvent& event ){ event.Skip(); }

@@ -1,4 +1,4 @@
-#include "include/ark_splitterWindow.h"
+#include "ark_splitterWindow.h"
 
 ark_splitterWindow::ark_splitterWindow(wxWindow *parent)
                 : wxSplitterWindow(parent, wxID_ANY,

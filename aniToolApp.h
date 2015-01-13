@@ -12,10 +12,16 @@
 
 #include <wx/app.h>
 
+class ark_scrolledWindow;
+
 class aniToolApp : public wxApp
 {
     public:
         virtual bool OnInit();
+public:
+private:
 };
+
+extern aniToolApp& wxGetApp();
 
 #endif // ANITOOLAPP_H

@@ -18,13 +18,17 @@
 #include "aniToolApp.h"
 #include "aniToolMain.h"
 
+
 IMPLEMENT_APP(aniToolApp);
 
 bool aniToolApp::OnInit()
 {
-    aniToolFrame* frame = new aniToolFrame(0L);
-    frame->SetIcon(wxICON(aaaa)); // To Set App Icon
-    frame->Show();
-    wxGetApp();
+	if ( !wxApp::OnInit() )
+		return false;
+
+	aniToolFrame *frame = new aniToolFrame(NULL);
+	frame->Show(true);
+
+   // wxGetApp();
     return true;
 }

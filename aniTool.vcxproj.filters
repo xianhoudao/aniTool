@@ -4,30 +4,16 @@
     <ClCompile Include="aniToolApp.cpp" />
     <ClCompile Include="aniToolMain.cpp" />
     <ClCompile Include="GUIFrame.cpp" />
-    <ClCompile Include="src\ark_scrolledWindow.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ark_splitterWindow.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
+    <ClCompile Include="ark_scrolledWindow.cpp" />
+    <ClCompile Include="ark_splitterWindow.cpp" />
+    <ClCompile Include="ark_leftPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aniToolApp.h" />
     <ClInclude Include="aniToolMain.h" />
     <ClInclude Include="GUIFrame.h" />
-    <ClInclude Include="include\ark_scrolledWindow.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ark_splitterWindow.h">
-      <Filter>include</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="include">
-      <UniqueIdentifier>{5568111e-b965-4336-90aa-4e342eac8970}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{2cfeb823-7bbf-4baf-ac83-cd47d518b7b1}</UniqueIdentifier>
-    </Filter>
+    <ClInclude Include="ark_scrolledWindow.h" />
+    <ClInclude Include="ark_splitterWindow.h" />
+    <ClInclude Include="ark_leftPanel.h" />
   </ItemGroup>
 </Project>
