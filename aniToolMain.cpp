@@ -51,11 +51,91 @@ wxString wxbuildinfo(wxbuildinfoformat format)
     return wxbuild;
 }
 
+class wxSizeReportCtrl : public wxControl
+{
+public:
+
+	wxSizeReportCtrl(wxWindow* parent, wxWindowID id = wxID_ANY,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		wxAuiManager* mgr = NULL)
+		: wxControl(parent, id, pos, size, wxNO_BORDER)
+	{
+		m_mgr = mgr;
+	}
+
+private:
+
+	void OnPaint(wxPaintEvent& WXUNUSED(evt))
+	{
+		wxPaintDC dc(this);
+		wxSize size = GetClientSize();
+		wxString s;
+		int h, w, height;
+
+		s.Printf(wxT("Size: %d x %d"), size.x, size.y);
+
+		dc.SetFont(*wxNORMAL_FONT);
+		dc.GetTextExtent(s, &w, &height);
+		height += 3;
+		dc.SetBrush(*wxWHITE_BRUSH);
+		dc.SetPen(*wxWHITE_PEN);
+		dc.DrawRectangle(0, 0, size.x, size.y);
+		dc.SetPen(*wxLIGHT_GREY_PEN);
+		dc.DrawLine(0, 0, size.x, size.y);
+		dc.DrawLine(0, size.y, size.x, 0);
+		dc.DrawText(s, (size.x-w)/2, ((size.y-(height*5))/2));
+
+		if (m_mgr)
+		{
+			wxAuiPaneInfo pi = m_mgr->GetPane(this);
+
+			s.Printf(wxT("Layer: %d"), pi.dock_layer);
+			dc.GetTextExtent(s, &w, &h);
+			dc.DrawText(s, (size.x-w)/2, ((size.y-(height*5))/2)+(height*1));
+
+			s.Printf(wxT("Dock: %d Row: %d"), pi.dock_direction, pi.dock_row);
+			dc.GetTextExtent(s, &w, &h);
+			dc.DrawText(s, (size.x-w)/2, ((size.y-(height*5))/2)+(height*2));
+
+			s.Printf(wxT("Position: %d"), pi.dock_pos);
+			dc.GetTextExtent(s, &w, &h);
+			dc.DrawText(s, (size.x-w)/2, ((size.y-(height*5))/2)+(height*3));
+
+			s.Printf(wxT("Proportion: %d"), pi.dock_proportion);
+			dc.GetTextExtent(s, &w, &h);
+			dc.DrawText(s, (size.x-w)/2, ((size.y-(height*5))/2)+(height*4));
+		}
+	}
+
+	void OnEraseBackground(wxEraseEvent& WXUNUSED(evt))
+	{
+		// intentionally empty
+	}
+
+	void OnSize(wxSizeEvent& WXUNUSED(evt))
+	{
+		Refresh();
+	}
+private:
+
+	wxAuiManager* m_mgr;
+
+	DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxSizeReportCtrl, wxControl)
+	EVT_PAINT(wxSizeReportCtrl::OnPaint)
+	EVT_SIZE(wxSizeReportCtrl::OnSize)
+	EVT_ERASE_BACKGROUND(wxSizeReportCtrl::OnEraseBackground)
+END_EVENT_TABLE()
 
 aniToolFrame::aniToolFrame(wxFrame *frame)
     : GUIFrame(frame)
 {
 	
+	m_mgr.SetManagedWindow(this);
+
 	wxMenuBar *bar = new wxMenuBar( 0 );
 	wxMenu* fileMenu;
 	///file menu
@@ -88,6 +168,17 @@ aniToolFrame::aniToolFrame(wxFrame *frame)
 	ProjectMenu->Append(menuSetImage);
 	bar->Append( ProjectMenu, wxT("&Project") );
 
+	//tile
+	wxMenu* tileMenu;
+	tileMenu = new wxMenu();
+	wxMenu*zoom = new wxMenu();
+	zoom->Append(idMenuZoomIn,"zoom in");
+	zoom->Append(idMenuZoomOut,"zoom out");
+	zoom->Append(idMenuZoomBack,"zoom 1:1");
+	tileMenu->AppendSubMenu(zoom,wxT("&zoom"));
+
+	bar->Append(tileMenu,wxT("&tile"));
+
 	///help menu
 	wxMenu* helpMenu;
 	helpMenu = new wxMenu();
@@ -97,75 +188,44 @@ aniToolFrame::aniToolFrame(wxFrame *frame)
 
 	///////////////////////////
 
-	/*statusBar = this->CreateStatusBar( 2, wxST_SIZEGRIP, wxID_ANY );*/
-    
+	statusBar = this->CreateStatusBar( 2, wxST_SIZEGRIP, wxID_ANY ); 
 	::wxInitAllImageHandlers();
 
-	/*
-	wxDocManager *docManager = new wxDocManager;
-	new wxDocTemplate(docManager, "Image", "*.png;*.jpg", "", "png;jpg",
-		"Image Doc", "Image View",
-		CLASSINFO(ark_ImageDocument), CLASSINFO(ark_ImageView));
-
-	wxFrame *frame = new wxDocMDIParentFrame(docManager, NULL, wxID_ANY,
- 	 			GetAppDisplayName(),
- 	 			wxDefaultPosition,
- 	 			wxSize(500, 400),
-				wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE);
-				
-	// A nice touch: a history of files visited. Use this menu.
-	docManager->FileHistoryUseMenu(ProjectMenu);
-#if wxUSE_CONFIG
-	docManager->FileHistoryLoad(*wxConfig::Get());
-#endif // wxUSE_CONFIG
-	*/
 	
-	ark_splitterWindow *splitter = new ark_splitterWindow(this);
+	
+	wxAuiToolBar *tbLeft = CreateLeftToolBar();
 
-	// If you use non-zero gravity you must initialize the splitter with its
-	// correct initial size, otherwise it will change the sash position by a
-	// huge amount when it's resized from its initial default size to its real
-	// size when the frame lays it out. This wouldn't be necessary if default
-	// zero gravity were used (although it would do no harm neither).
-	splitter->SetSize(this->GetClientSize());
-	splitter->SetSashGravity(1.0);
-	splitter->SetMinimumPaneSize(100);
+	m_mgr.AddPane(tbLeft, wxAuiPaneInfo().
+		Name(wxT("tbLeft")).Caption(wxT("Left toolbar")).
+		ToolbarPane().Left().
+		GripperTop());
+		
+	wxAuiToolBar *tbTop = CreateTopToolBar();
+	m_mgr.AddPane(tbTop, wxAuiPaneInfo().
+		Name(wxT("tbTop")).Caption(wxT("top toolbar")).
+		ToolbarPane().Top());
 
-	m_left = new ark_leftPanel(splitter);
-	wxColour color;
-	color.Set(16,161,244);
-	m_left->SetBackgroundColour(color);
-	m_right = new ark_scrolledWindow(splitter);
-	m_right->SetBackgroundColour(*wxCYAN);
-	splitter->SplitVertically(m_left, m_right, 0);
+	wxAuiToolBar *tbRight = CreateRightToolBar();
+	m_mgr.AddPane(tbRight, wxAuiPaneInfo().
+		Name(wxT("tbRight")).Caption(wxT("top toolbar")).
+		ToolbarPane().Right());
+
+	ark_splitterWindow *m_splitter = CreateSplitterWindow();
+	m_mgr.AddPane(m_splitter, wxAuiPaneInfo().
+		Name(wxT("splitter")).Caption(wxT("m_splitter")).
+		CenterPane().
+		CloseButton(true).MaximizeButton(true));
+
 
 	this->SetMenuBar(bar);
 	this->SetIcon(wxICON(aaaa)); // To Set App Icon
-
-// 	wxAuiToolBar* tb5 = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-// 		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_VERTICAL);
-// 	tb5->SetToolBitmapSize(wxSize(48,48));
-// 	tb5->AddTool(idToolBar1+1, wxT("Test"), wxArtProvider::GetBitmap(wxART_ERROR));
-// 	tb5->AddSeparator();
-// 	tb5->AddTool(idToolBar1+2, wxT("Test"), wxArtProvider::GetBitmap(wxART_QUESTION));
-// 	tb5->AddTool(idToolBar1+3, wxT("Test"), wxArtProvider::GetBitmap(wxART_INFORMATION));
-// 	tb5->AddTool(idToolBar1+4, wxT("Test"), wxArtProvider::GetBitmap(wxART_WARNING));
-// 	tb5->AddTool(idToolBar1+5, wxT("Test"), wxArtProvider::GetBitmap(wxART_MISSING_IMAGE));
-// 	//tb5->SetCustomOverflowItems(prepend_items, append_items);
-// 	tb5->Realize();
-
+	m_mgr.Update();
 	mbar = bar;
-	m_splitter = splitter;
-// 	m_mgr.AddPane(tb5, wxAuiPaneInfo().
-// 		Name(wxT("tool")).Caption(wxT("Pane Caption")).
-// 		Left().Position(1));
-// 	m_mgr.AddPane(m_splitter,wxAuiPaneInfo().
-// 		Name(wxT("tool1")).Caption(wxT("Pane Caption")).
-// 		Left().Position(2));
 }
 
 aniToolFrame::~aniToolFrame()
 {
+	m_mgr.UnInit();
 }
 
 void aniToolFrame::OnClose(wxCloseEvent &event)
@@ -192,4 +252,105 @@ void aniToolFrame::OnSetImage(wxCommandEvent& event)
 	{
 		m_left->LoadPic(dialog.GetPath());
 	}
+}
+
+void aniToolFrame::OnZoomIn( wxCommandEvent& event )
+{
+	if (this->m_left)
+	{
+		this->m_left->ZoomIn();
+	}
+}
+void aniToolFrame::OnZoomOut( wxCommandEvent& event )
+{
+	if (this->m_left)
+	{
+		this->m_left->ZoomOut();
+	}
+}
+void aniToolFrame::OnZoomBack( wxCommandEvent& event )
+{
+	if (this->m_left)
+	{
+		this->m_left->ZoomBack();
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+//private
+
+wxAuiToolBar *aniToolFrame::CreateLeftToolBar()
+{
+	wxAuiToolBar* tb5 = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_VERTICAL);
+	tb5->SetToolBitmapSize(wxSize(48,48));
+	wxImage img;
+	img.LoadFile("Kombine_toolbar_045.png");
+	tb5->AddTool(idMenuZoomIn, wxT("Test"), wxBitmap(img));
+	tb5->AddSeparator();
+	img.LoadFile("Kombine_toolbar_044.png");
+	tb5->AddTool(idMenuZoomOut, wxT("Test"),  wxBitmap(img));
+	//tb5->SetCustomOverflowItems(prepend_items, append_items);
+	tb5->Realize();
+
+	return tb5;
+}
+
+wxAuiToolBar *aniToolFrame::CreateTopToolBar()
+{
+	wxAuiToolBar* tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_HORIZONTAL);
+	tb->SetToolBitmapSize(wxSize(48,48));
+	wxImage img;
+	img.LoadFile("Kombine_toolbar_045.png");
+	tb->AddTool(idMenuZoomIn, wxT("Test"), wxBitmap(img));
+	tb->AddSeparator();
+	img.LoadFile("Kombine_toolbar_044.png");
+	tb->AddTool(idMenuZoomOut, wxT("Test"),  wxBitmap(img));
+	//tb5->SetCustomOverflowItems(prepend_items, append_items);
+	tb->Realize();
+
+	return tb;
+}
+wxAuiToolBar *aniToolFrame::CreateRightToolBar()
+{
+	wxAuiToolBar* tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_VERTICAL);
+	tb->SetToolBitmapSize(wxSize(48,48));
+	wxImage img;
+	img.LoadFile("Kombine_toolbar_045.png");
+	tb->AddTool(idMenuZoomIn, wxT("Test"), wxBitmap(img));
+	tb->AddSeparator();
+	img.LoadFile("Kombine_toolbar_044.png");
+	tb->AddTool(idMenuZoomOut, wxT("Test"),  wxBitmap(img));
+	//tb5->SetCustomOverflowItems(prepend_items, append_items);
+	tb->Realize();
+
+	return tb;
+}
+wxSizeReportCtrl* aniToolFrame::CreateSizeReportCtrl(int width, int height)
+{
+	wxSizeReportCtrl* ctrl = new wxSizeReportCtrl(this, wxID_ANY,
+		wxDefaultPosition,
+		wxSize(width, height), &m_mgr);
+	return ctrl;
+}
+
+ark_splitterWindow *aniToolFrame::CreateSplitterWindow()
+{
+	ark_splitterWindow *splitter = new ark_splitterWindow(this);
+	splitter->SetSize(this->GetClientSize());
+	splitter->SetSashGravity(1.0);
+	splitter->SetMinimumPaneSize(100);
+
+	m_left = new ark_leftPanel(splitter);
+	wxColour color;
+	color.Set(16,161,244);
+	m_left->SetBackgroundColour(color);
+	m_right = new ark_scrolledWindow(splitter);
+	m_right->SetBackgroundColour(*wxCYAN);
+	splitter->SplitVertically(m_left, m_right, 0);
+	m_left->SetFrameOwner(this);
+
+	return splitter;
 }

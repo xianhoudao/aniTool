@@ -31,6 +31,9 @@ enum MyEnum
 	idMenuSave,
 	idMenuSaveAs,
 	idMenuSetImage,
+	idMenuZoomIn,
+	idMenuZoomOut,
+	idMenuZoomBack,
 	////
 	idToolBar1,
 };
@@ -49,6 +52,9 @@ class GUIFrame : public wxFrame
         void _wxFB_OnQuit( wxCommandEvent& event ){ OnQuit( event ); }
         void _wxFB_OnAbout( wxCommandEvent& event ){ OnAbout( event ); }
         void _wxFB_OnSetImage( wxCommandEvent& event ){ OnSetImage( event ); }
+		void _wxFB_OnZoomIn( wxCommandEvent& event ){ OnZoomIn( event ); }
+		void _wxFB_OnZoomOut( wxCommandEvent& event ){ OnZoomOut( event ); }
+		void _wxFB_OnZoomBack( wxCommandEvent& event ){ OnZoomBack( event ); }
 
     protected:
 
@@ -58,7 +64,9 @@ class GUIFrame : public wxFrame
         virtual void OnQuit( wxCommandEvent& event ){ event.Skip(); }
         virtual void OnAbout( wxCommandEvent& event ){ event.Skip(); }
         virtual void OnSetImage( wxCommandEvent& event ){ event.Skip(); }
-
+		virtual void OnZoomIn( wxCommandEvent& event ){ event.Skip(); }
+		virtual void OnZoomOut( wxCommandEvent& event ){ event.Skip(); }
+		virtual void OnZoomBack( wxCommandEvent& event ){ event.Skip(); }
     public:
         GUIFrame( wxWindow* parent, int id = wxID_ANY, wxString title = wxT("wxWidgets Application Template"), wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 481,466 ), int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 

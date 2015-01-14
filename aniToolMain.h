@@ -20,6 +20,8 @@
 #include "wx/aui/aui.h"
 
 class ark_leftPanel;
+class wxSizeReportCtrl;
+class ark_splitterWindow;
 
 class aniToolFrame: public GUIFrame
 {
@@ -31,8 +33,16 @@ class aniToolFrame: public GUIFrame
         virtual void OnQuit(wxCommandEvent& event);
         virtual void OnAbout(wxCommandEvent& event);
         virtual void OnSetImage(wxCommandEvent& event);
+		virtual void OnZoomIn( wxCommandEvent& event );
+		virtual void OnZoomOut( wxCommandEvent& event );
+		virtual void OnZoomBack( wxCommandEvent& event );
 protected:
-	
+private:
+	wxAuiToolBar *CreateLeftToolBar();
+	wxAuiToolBar *CreateTopToolBar();
+	wxAuiToolBar *CreateRightToolBar();
+	wxSizeReportCtrl* CreateSizeReportCtrl(int width, int height);
+	ark_splitterWindow *CreateSplitterWindow();
 private:
 		wxImage m_image;
 		wxMenuBar* mbar;
